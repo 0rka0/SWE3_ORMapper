@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Configuration;
+using System.Collections.Specialized;
+using SWE3_ORM_Framework;
+using Npgsql;
 
 namespace SWE3_ORM
 {
@@ -6,7 +10,10 @@ namespace SWE3_ORM
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            string connectionString = ConfigurationManager.AppSettings["connectionString"];
+            ORMapper.StartConnection(new NpgsqlConnection(connectionString));
+
+
         }
     }
 }
