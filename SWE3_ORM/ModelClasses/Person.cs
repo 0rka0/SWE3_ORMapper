@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace SWE3_ORM_App.ModelClasses
 {
-    [Table(Name = "persons", Discriminator = "person")]
-    public class Person
+    [Table(Name = "persons", Discriminator = true)]
+    public abstract class Person
     {
         [PrimaryKey]
         public string Id { get; set; }

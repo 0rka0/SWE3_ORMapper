@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace SWE3_ORM_App.ModelClasses
 {
-    [Table(Name = "persons", Discriminator = "student")]
     public class Student : Person
     {
         public int Grade { get; set; }

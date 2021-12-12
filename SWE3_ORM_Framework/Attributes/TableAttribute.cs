@@ -8,10 +8,8 @@ namespace SWE3_ORM_Framework.Attributes
 {
     public class TableAttribute : Attribute
     {
-        public string Name;
+        public string Name = null;
 
-        public string Discriminator;
-
-        //public string Child;
+        public bool Discriminator = false;
     }
 }
