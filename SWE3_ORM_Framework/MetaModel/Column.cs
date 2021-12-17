@@ -138,23 +138,29 @@ namespace SWE3_ORM_Framework.MetaModel
             return obj;
         }
 
-        public object FillReferencedColumns(object list, object obj)
+        public object FillReferencedColumns(object list, object obj, Type type)
         {
-            ORMapper.IncludeReferencedColumns(MemberType.GenericTypeArguments[0], list, GetReferenceSql(), 
-                new Tuple<string, object>[] { new Tuple<string, object>(":fk", Table.PrimaryKey.GetObjectValue(obj)) } );
-        
+            var dict = new Dictionary<string, object>() { { ":fk", Table.PrimaryKey.GetObjectValue(obj) } };
+            ORMapper.IncludeReferencedColumns(MemberType.GenericTypeArguments[0], list, GetReferenceSql(type), dict );        
             return list;
         }
 
-        string GetReferenceSql()
+        string GetReferenceSql(Type type)
         {
-            string value;
             Table table = ORMapper.GetTable(MemberType.GenericTypeArguments[0]);
+            string sql = $"SELECT * FROM {table.Name} WHERE ";
+
+            if (table.Discriminator != null)
+            {
+                sql += ORMapper.GetDiscriminatorSql(type);
+            }
+
             if (IsMtoN)
             {
-                
+                return sql += $"ID IN (SELECT {TargetColumn} FROM {TargetTable} WHERE {Name} = :fk)";
             }
-            return "";
+
+            return sql += $"{Name} = :fk";
         }
     }
 }

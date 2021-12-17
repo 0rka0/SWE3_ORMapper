@@ -28,30 +28,27 @@ namespace SWE3_ORM_Framework
             IDbCommand cmd = Connection.CreateCommand();
             cmd.CommandText = $"SELECT * FROM {table.Name} WHERE ";
 
-            var tmpSubtypes = Assembly
-               .GetAssembly(type)
-               .GetTypes()
-               .Where(t => t.IsSubclassOf(type));
-            var subtypes = tmpSubtypes.ToArray();
-
             if (table.Discriminator != null)
             {
-                IDataParameter dParam = cmd.CreateParameter();
-                cmd.CommandText += $"({nameof(table.Discriminator)} = :v2";
-                dParam.ParameterName = ":v2";
-                dParam.Value = table.Discriminator;
-                cmd.Parameters.Add(dParam);
+                cmd.CommandText += GetDiscriminatorSql(type);
+                //var subtypes = GetSubtypes(type);
 
-                for (int i = 0; i < subtypes.Length; i++)
-                {
-                    IDataParameter ddParam = cmd.CreateParameter();
-                    var pName = ":v" + (i + 3);
-                    cmd.CommandText += $" OR {nameof(table.Discriminator)} = {pName}";
-                    ddParam.ParameterName = pName;
-                    ddParam.Value = subtypes[i].Name;
-                    cmd.Parameters.Add(ddParam);
-                }
-                cmd.CommandText += ") AND ";
+                //IDataParameter dParam = cmd.CreateParameter();
+                //cmd.CommandText += $"({nameof(table.Discriminator)} = :v2";
+                //dParam.ParameterName = ":v2";
+                //dParam.Value = table.Discriminator;
+                //cmd.Parameters.Add(dParam);
+
+                //for (int i = 0; i < subtypes.Length; i++)
+                //{
+                //    IDataParameter ddParam = cmd.CreateParameter();
+                //    var pName = ":v" + (i + 3);
+                //    cmd.CommandText += $" OR {nameof(table.Discriminator)} = {pName}";
+                //    ddParam.ParameterName = pName;
+                //    ddParam.Value = subtypes[i].Name;
+                //    cmd.Parameters.Add(ddParam);
+                //}
+                //cmd.CommandText += ") AND ";
             }
 
             IDataParameter pkParam = cmd.CreateParameter();
@@ -63,16 +60,48 @@ namespace SWE3_ORM_Framework
             Console.WriteLine(cmd.CommandText);
 
             IDataReader reader = cmd.ExecuteReader();
-            List<object> values = new List<object>();
             if (reader.Read())
             {
-                value = CreateObject(type, reader);
+                var values = TransformReader(reader);
+                reader.Close();
+                reader.Dispose();
+                value = CreateObject(type, values);
             }
 
-            reader.Close();
             cmd.Dispose();
 
             return value;
+        }
+
+        public static Type[] GetSubtypes(Type type)
+        {
+            var tmpSubtypes = Assembly
+                    .GetAssembly(type)
+                    .GetTypes()
+                    .Where(t => t.IsSubclassOf(type));
+            return tmpSubtypes.ToArray();
+        }
+
+        public static string GetDiscriminatorSql(Type type)
+        {
+            Table table = GetTable(type);
+            var sql = "";
+            var subtypes = GetSubtypes(type);
+
+            sql += $"({nameof(table.Discriminator)} = '{table.Discriminator}'";
+
+            for (int i = 0; i < subtypes.Length; i++)
+            {
+                sql += $" OR {nameof(table.Discriminator)} = '{subtypes[i].Name}'";
+            }
+
+            sql += ") AND ";
+            return sql;
+        }
+
+        public static Dictionary<string, object> TransformReader(IDataReader reader)
+        {
+            return Enumerable.Range(0, reader.FieldCount).ToDictionary(reader.GetName, reader.GetValue);
         }
 
         public static void Create(object obj)
@@ -179,39 +208,64 @@ namespace SWE3_ORM_Framework
             return new Table(obj.GetType());
         }
 
-        static object CreateObject(Type type, IDataReader reader)
+        static object CreateObject(Type type, Dictionary<string,object> reader, bool checkreferences = true)
         {
-            try
+            if(reader.ContainsKey("discriminator"))
             {
-                var classType = reader.GetValue(reader.GetOrdinal("discriminator"));
-
-                if (classType != DBNull.Value)
-                {
-                    var asm = type.Assembly;
-                    type = asm.GetTypes().Single(t => t.Name == classType.ToString());
-                }
+                var classType = reader["discriminator"];
+                var asm = type.Assembly;
+                type = asm.GetTypes().Single(t => t.Name == classType.ToString());
             }
-            catch { }
 
             var table = GetTable(type);
             object value = Activator.CreateInstance(type);
 
             foreach (var col in table.TableCols)
             {
-                col.SetObjectValue(value, col.ToCodeType(reader.GetValue(reader.GetOrdinal(col.Name))));
+                col.SetObjectValue(value, col.ToCodeType(reader[col.Name.ToLower()]));
             }
 
             foreach (var col in table.ReferencedCols)
             {
-                col.SetObjectValue(value, col.FillReferencedColumns(Activator.CreateInstance(col.MemberType), value));
+                col.SetObjectValue(value, col.FillReferencedColumns(Activator.CreateInstance(col.MemberType), value, type));
             }
 
             return value;
         }
 
-        public static void IncludeReferencedColumns(Type type, object list, string sql, IEnumerable<Tuple<string, object>> parameters)
+        public static void IncludeReferencedColumns(Type type, object list, string sql, Dictionary<string, object> parameters)
         {
+            IDbCommand cmd = Connection.CreateCommand();
+            cmd.CommandText = sql;
 
+            foreach(var pair in parameters)
+            {
+                IDataParameter param = cmd.CreateParameter();
+                param.ParameterName = pair.Key;
+                param.Value = pair.Value;
+                cmd.Parameters.Add(param);
+            }
+
+            IDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var values = TransformReader(reader);
+                reader.Close();
+                //Circular Reference results in endless loop
+                var value = CreateObject(type, values, false);
+            }
+
+            reader.Dispose();
+
+            while (reader.Read())
+            {
+                //list.GetType().GetMethod("Add").Invoke(list, new object[] { CreateObject(type, reader,) });
+            }
+
+            reader.Close();
+            reader.Dispose();
+            cmd.Dispose();
         }
     }
 }

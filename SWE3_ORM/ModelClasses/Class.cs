@@ -18,6 +18,7 @@ namespace SWE3_ORM_App.ModelClasses
         [ForeignKey]
         public Teacher kTeacher { get; set; }
 
+        [ForeignKey(Name = "kclass")]
         public List<Student> Students { get; set; } = new List<Student>();
     }
 }

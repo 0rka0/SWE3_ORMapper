@@ -22,16 +22,23 @@ namespace SWE3_ORM_App.ShowCase
             teacher.Gender = Gender.Male;
             teacher.Classes = new System.Collections.Generic.List<Class>() { new Class(), new Class() };
 
+            var c = new Class();
+            c.Id = "c.1";
+            c.Name = "A2";
+            c.kTeacher = teacher;
+
             try
             {
-                //ORMapper.Create(teacher);
+                //ORMapper.Create(c);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
 
-            var test = ORMapper.Get("t.0", typeof(Person));
+            var test = ORMapper.Get("t.0", typeof(Teacher));
+            Console.WriteLine(((Teacher)test).Id);
+            Console.WriteLine(((Teacher)test).Classes[0].Id);
         }
     }
 }
