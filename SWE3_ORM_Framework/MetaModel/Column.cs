@@ -1,6 +1,8 @@
 ﻿using SWE3_ORM_Framework.Caching;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -162,6 +164,23 @@ namespace SWE3_ORM_Framework.MetaModel
             }
 
             return sql += $"{Name} = :fk";
+        }
+
+        public void SetReferences(object obj)
+        {
+            var refType = Type.GetGenericArguments()[0];
+            var refTable = ORMapper.GetTable(refType);
+            var primaryKey = Table.PrimaryKey.ToColumnType(Table.PrimaryKey.GetObjectValue(obj));
+
+            if (IsMtoN)
+            {
+                ORMapper.PrepTargetTable(TargetTable, Name, primaryKey);
+
+                foreach (object o in (IEnumerable)GetObjectValue(obj))
+                {
+                    ORMapper.InsertIntoMiddleTable(o, TargetTable, Name, primaryKey, TargetColumn, refTable);
+                }
+            }
         }
     }
 }

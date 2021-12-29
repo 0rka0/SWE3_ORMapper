@@ -14,7 +14,6 @@ namespace SWE3_ORM_Framework
         private static IDbConnection Connection { get; set; }
 
         private static ICache cache = new Cache();
-        private static ICollection<object> tmpCache = new List<object>();
 
         public static void StartConnection(IDbConnection connection)
         {
@@ -150,7 +149,7 @@ namespace SWE3_ORM_Framework
             }
             cmd.Dispose();
 
-            SetReferences(obj);
+            SetReferences(table, obj);
 
             cache.CacheObject(obj);
         }
@@ -201,7 +200,7 @@ namespace SWE3_ORM_Framework
             }
             cmd.Dispose();
 
-            SetReferences(obj);
+            SetReferences(table, obj);
 
             cache.CacheObject(obj);
         }
@@ -308,9 +307,48 @@ namespace SWE3_ORM_Framework
             cmd.Dispose();
         }
 
-        private static void SetReferences(object obj)
+        private static void SetReferences(Table table, object obj)
         {
+            foreach(var col in table.ReferencedCols)
+            {
+                col.SetReferences(obj);
+            }
+        }
 
+        public static void PrepTargetTable(string targetTable, string colName, object pk)
+        {
+            string pName = ":pk";
+            IDbCommand cmd = Connection.CreateCommand();
+            cmd.CommandText = $"DELETE FROM {targetTable} WHERE {colName} = {pName}";
+
+            IDataParameter param = cmd.CreateParameter();
+            param.ParameterName = pName;
+            param.Value = pk;
+            cmd.Parameters.Add(param);
+
+            cmd.ExecuteNonQuery();
+            cmd.Dispose();
+        }
+
+        public static void InsertIntoMiddleTable(object obj, string targetTable, string colName, object pk, string targetColName, Table refTable)
+        {
+            string pName = ":pk";
+            string p2Name = ":fk";
+            IDbCommand cmd = Connection.CreateCommand();
+            cmd.CommandText = $"INSERT INTO {targetTable} ({colName}, {targetColName}) VALUES ({pName}, {p2Name})";
+
+            IDataParameter param = cmd.CreateParameter();
+            param.ParameterName = pName;
+            param.Value = pk;
+            cmd.Parameters.Add(param);
+
+            param = cmd.CreateParameter();
+            param.ParameterName = p2Name;
+            param.Value = refTable.PrimaryKey.ToColumnType(refTable.PrimaryKey.GetObjectValue(obj));
+            cmd.Parameters.Add(param);
+
+            cmd.ExecuteNonQuery();
+            cmd.Dispose();
         }
     }
 }

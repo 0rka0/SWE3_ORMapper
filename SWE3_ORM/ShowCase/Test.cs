@@ -60,9 +60,9 @@ namespace SWE3_ORM_App.ShowCase
             try
             {
                 //ORMapper.Create(course1);
-                course1.students.Add(s1);
-                course1.students.Add(s2);
-                ORMapper.Update(course1);
+                //course1.students.Add(s1);
+                //course1.students.Add(s2);
+                //ORMapper.Update(course1);
             }
             catch (Exception ex)
             {
@@ -70,6 +70,7 @@ namespace SWE3_ORM_App.ShowCase
             }
 
             var test = ORMapper.Get("t.0", typeof(Teacher));
+            var test2 = ORMapper.Get("co.0", typeof(Course));
             Console.WriteLine(((Teacher)test).Id);
             Console.WriteLine(((Teacher)test).Classes[0].Id);
         }
