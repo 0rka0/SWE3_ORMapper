@@ -20,7 +20,7 @@ namespace SWE3_ORM_App.ModelClasses
         [ForeignKey]
         public Teacher kTeacher { get; set; }
 
-        [ForeignKey(TargetTable = "student_courses", TargetColumn = "kstudent")]
-        public List<Student> kCourse { get; set; } = new List<Student>();
+        [ForeignKey(TargetTable = "student_courses", Name = "kcourse", TargetColumn = "kstudent")]
+        public List<Student> students { get; set; } = new List<Student>();
     }
 }

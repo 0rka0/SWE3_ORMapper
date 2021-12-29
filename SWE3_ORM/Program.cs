@@ -15,7 +15,7 @@ namespace SWE3_ORM
             string connectionString = ConfigurationManager.AppSettings["connectionString"];
             ORMapper.StartConnection(new NpgsqlConnection(connectionString));
 
-            InsertIntoDb.Run();
+            Test.Run();
         }
     }
 }

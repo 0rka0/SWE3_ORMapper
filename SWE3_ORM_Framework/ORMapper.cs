@@ -1,4 +1,5 @@
-﻿using SWE3_ORM_Framework.Exceptions;
+﻿using SWE3_ORM_Framework.Caching;
+using SWE3_ORM_Framework.Exceptions;
 using SWE3_ORM_Framework.MetaModel;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,8 @@ namespace SWE3_ORM_Framework
     {
         private static IDbConnection Connection { get; set; }
 
-        //private static Dictionary<Type, Table> tables = new Dictionary<Type, Table>();
+        private static ICache cache = new Cache();
+        private static ICollection<object> tmpCache = new List<object>();
 
         public static void StartConnection(IDbConnection connection)
         {
@@ -22,6 +24,11 @@ namespace SWE3_ORM_Framework
 
         public static object Get(object primaryKey, Type type)
         {
+            if(cache.ContainsKey(primaryKey))
+            {
+                return cache.GetObject(primaryKey);
+            }
+
             object value = null;
             Table table = GetTable(type);
 
@@ -31,24 +38,6 @@ namespace SWE3_ORM_Framework
             if (table.Discriminator != null)
             {
                 cmd.CommandText += GetDiscriminatorSql(type);
-                //var subtypes = GetSubtypes(type);
-
-                //IDataParameter dParam = cmd.CreateParameter();
-                //cmd.CommandText += $"({nameof(table.Discriminator)} = :v2";
-                //dParam.ParameterName = ":v2";
-                //dParam.Value = table.Discriminator;
-                //cmd.Parameters.Add(dParam);
-
-                //for (int i = 0; i < subtypes.Length; i++)
-                //{
-                //    IDataParameter ddParam = cmd.CreateParameter();
-                //    var pName = ":v" + (i + 3);
-                //    cmd.CommandText += $" OR {nameof(table.Discriminator)} = {pName}";
-                //    ddParam.ParameterName = pName;
-                //    ddParam.Value = subtypes[i].Name;
-                //    cmd.Parameters.Add(ddParam);
-                //}
-                //cmd.CommandText += ") AND ";
             }
 
             IDataParameter pkParam = cmd.CreateParameter();
@@ -64,11 +53,14 @@ namespace SWE3_ORM_Framework
             {
                 var values = TransformReader(reader);
                 reader.Close();
-                reader.Dispose();
                 value = CreateObject(type, values);
             }
 
+            reader.Dispose();
             cmd.Dispose();
+
+            cache.CacheObject(value);
+            cache.ClearTmp();
 
             return value;
         }
@@ -157,10 +149,19 @@ namespace SWE3_ORM_Framework
                 throw new OrmDuplicateException(nameof(Create), "Entry with specified id does already exist in database.", ex);
             }
             cmd.Dispose();
+
+            SetReferences(obj);
+
+            cache.CacheObject(obj);
         }
 
         public static void Update(object obj)
         {
+            if (!cache.CacheChanged(obj))
+            {
+                return;
+            }
+
             Table table = GetTable(obj);
 
             IDbCommand cmd = Connection.CreateCommand();
@@ -199,6 +200,28 @@ namespace SWE3_ORM_Framework
                 throw new OrmNotFoundException(nameof(Create), "Entry with specified exception does not exist in database.", ex);
             }
             cmd.Dispose();
+
+            SetReferences(obj);
+
+            cache.CacheObject(obj);
+        }
+
+        public static void Remove(object obj)
+        {
+            Table table = GetTable(obj);
+
+            IDbCommand cmd = Connection.CreateCommand();
+            cmd.CommandText = $"DELETE FROM {table.Name} WHERE {table.PrimaryKey.Name} = :v1";
+            
+            IDataParameter param = cmd.CreateParameter();
+            param.ParameterName = ":v1";
+            param.Value = table.PrimaryKey.GetObjectValue(obj);
+            cmd.Parameters.Add(param);
+
+            cmd.ExecuteNonQuery();
+            cmd.Dispose();
+
+            cache.RemoveObject(obj);
         }
 
         public static Table GetTable(object obj)
@@ -208,7 +231,7 @@ namespace SWE3_ORM_Framework
             return new Table(obj.GetType());
         }
 
-        static object CreateObject(Type type, Dictionary<string,object> reader, bool checkreferences = true)
+        static object CreateObject(Type type, Dictionary<string,object> reader)
         {
             if(reader.ContainsKey("discriminator"))
             {
@@ -218,11 +241,31 @@ namespace SWE3_ORM_Framework
             }
 
             var table = GetTable(type);
-            object value = Activator.CreateInstance(type);
+
+            var pk = table.PrimaryKey.ToCodeType(reader[table.PrimaryKey.Name.ToLower()], cache);
+
+            object value = null;
+            
+            if(cache.ContainsKey(pk))
+            {
+                value = cache.GetObject(pk);
+            }
+            else
+            {
+                value = cache.SearchTmp(pk);
+            }
+
+            if (value == null)
+            {
+                value = Activator.CreateInstance(type);
+                cache.AddTmp(value);
+            }
+            else
+                return value;
 
             foreach (var col in table.TableCols)
             {
-                col.SetObjectValue(value, col.ToCodeType(reader[col.Name.ToLower()]));
+                col.SetObjectValue(value, col.ToCodeType(reader[col.Name.ToLower()], cache));
             }
 
             foreach (var col in table.ReferencedCols)
@@ -247,25 +290,27 @@ namespace SWE3_ORM_Framework
             }
 
             IDataReader reader = cmd.ExecuteReader();
+            List<Dictionary<string, object>> values = new List<Dictionary<string, object>>();
 
             while (reader.Read())
             {
-                var values = TransformReader(reader);
-                reader.Close();
-                //Circular Reference results in endless loop
-                var value = CreateObject(type, values, false);
+                values.Add(TransformReader(reader));
             }
-
-            reader.Dispose();
-
-            while (reader.Read())
-            {
-                //list.GetType().GetMethod("Add").Invoke(list, new object[] { CreateObject(type, reader,) });
-            }
-
             reader.Close();
+
+            foreach (var dict in values)
+            {
+                var value = CreateObject(type, dict);
+                list.GetType().GetMethod("Add").Invoke(list, new object[] { value });
+            }
+
             reader.Dispose();
             cmd.Dispose();
+        }
+
+        private static void SetReferences(object obj)
+        {
+
         }
     }
 }

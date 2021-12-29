@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SWE3_ORM_Framework.Caching;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -108,7 +109,7 @@ namespace SWE3_ORM_Framework.MetaModel
             return obj;
         }
 
-        public object ToCodeType(object obj)
+        public object ToCodeType(object obj, ICache cache)
         {
             if (IsFK)
             {
@@ -152,7 +153,7 @@ namespace SWE3_ORM_Framework.MetaModel
 
             if (table.Discriminator != null)
             {
-                sql += ORMapper.GetDiscriminatorSql(type);
+                sql += ORMapper.GetDiscriminatorSql(table.Member);
             }
 
             if (IsMtoN)
