@@ -9,18 +9,41 @@ using System.Reflection;
 
 namespace SWE3_ORM_Framework
 {
+    /// <summary>
+    /// General OR-Mapper class. Functions can be called to perform basic Database interactions such as:
+    /// Create: Inserts a new object into the database.
+    /// Update: Updates existing entry in database.
+    /// Get: Returns a single object from the database.
+    /// Remove: Removes single entry from the database.
+    /// </summary>
     public static class ORMapper
     {
+        /// <summary>
+        /// Holds the connection to the database during runtime.
+        /// </summary>
         private static IDbConnection Connection { get; set; }
 
+        /// <summary>
+        /// Caches objects during runtime to reduce the load on the database and enable the possibility of including references.
+        /// </summary>
         private static ICache cache = new Cache();
 
+        /// <summary>
+        /// Starts connection to the database with the given parameter.
+        /// </summary>
+        /// <param name="connection">Connection created with connection string.</param>
         public static void StartConnection(IDbConnection connection)
         {
             Connection = connection;
             Connection.Open();
         }
 
+        /// <summary>
+        /// Gets a single object with a specific type and primary key from the database if one was found during the selecting process.
+        /// </summary>
+        /// <param name="primaryKey">Primary key of the object that wants to be selected.</param>
+        /// <param name="type">Type of the object that wats to be selected. Takes typeof(class).</param>
+        /// <returns>Returns the selected object. Otherwise retrns null.</returns>
         public static object Get(object primaryKey, Type type)
         {
             if(cache.ContainsKey(primaryKey))
@@ -64,6 +87,11 @@ namespace SWE3_ORM_Framework
             return value;
         }
 
+        /// <summary>
+        /// Takes a type and searches its assembly for subtypes that derive from the specified type.
+        /// </summary>
+        /// <param name="type">The type that subtypes will be searched for.</param>
+        /// <returns>Array of the subtypes if any were found.</returns>
         public static Type[] GetSubtypes(Type type)
         {
             var tmpSubtypes = Assembly
@@ -73,6 +101,11 @@ namespace SWE3_ORM_Framework
             return tmpSubtypes.ToArray();
         }
 
+        /// <summary>
+        /// Creates the sql string addition to select objects of a certain type in a single table that consists of multiple types by their discriminator.
+        /// </summary>
+        /// <param name="type">The type to determine which table and discriminator will be used.</param>
+        /// <returns>The string with the corresponding sql.</returns>
         public static string GetDiscriminatorSql(Type type)
         {
             Table table = GetTable(type);
@@ -90,11 +123,21 @@ namespace SWE3_ORM_Framework
             return sql;
         }
 
+        /// <summary>
+        /// Returns a Dictionary with the values of the Datareader for a single row so the reader can be closed and reused before the read data is processed.
+        /// Alternative to deal with multiple result sets.
+        /// </summary>
+        /// <param name="reader">The Datareader that data was read with.</param>
+        /// <returns>A dictionary with the read data. The key represents the column name and the value holds an object with the database entry.</returns>
         public static Dictionary<string, object> TransformReader(IDataReader reader)
         {
             return Enumerable.Range(0, reader.FieldCount).ToDictionary(reader.GetName, reader.GetValue);
         }
 
+        /// <summary>
+        /// Creates and inserts an object 
+        /// </summary>
+        /// <param name="obj"></param>
         public static void Create(object obj)
         {
             Table table = GetTable(obj);
