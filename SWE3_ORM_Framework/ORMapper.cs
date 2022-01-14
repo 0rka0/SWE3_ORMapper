@@ -137,7 +137,7 @@ namespace SWE3_ORM_Framework
         /// <summary>
         /// Creates and inserts an object 
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="obj">Object that will be inserted into the database</param>
         public static void Create(object obj)
         {
             Table table = GetTable(obj);
@@ -280,7 +280,7 @@ namespace SWE3_ORM_Framework
             return new Table(obj.GetType());
         }
 
-        static object CreateObject(Type type, Dictionary<string,object> reader)
+        public static object CreateObject(Type type, Dictionary<string,object> reader)
         {
             if(reader.ContainsKey("discriminator"))
             {
@@ -293,36 +293,36 @@ namespace SWE3_ORM_Framework
 
             var pk = table.PrimaryKey.ToCodeType(reader[table.PrimaryKey.Name.ToLower()], cache);
 
-            object value = null;
+            object obj = null;
             
             if(cache.ContainsKey(pk))
             {
-                value = cache.GetObject(pk);
+                obj = cache.GetObject(pk);
             }
             else
             {
-                value = cache.SearchTmp(pk);
+                obj = cache.SearchTmp(pk);
             }
 
-            if (value == null)
+            if (obj == null)
             {
-                value = Activator.CreateInstance(type);
-                cache.AddTmp(value);
+                obj = Activator.CreateInstance(type);
+                cache.AddTmp(obj);
             }
             else
-                return value;
+                return obj;
 
             foreach (var col in table.TableCols)
             {
-                col.SetObjectValue(value, col.ToCodeType(reader[col.Name.ToLower()], cache));
+                col.SetObjectValue(obj, col.ToCodeType(reader[col.Name.ToLower()], cache));
             }
 
             foreach (var col in table.ReferencedCols)
             {
-                col.SetObjectValue(value, col.FillReferencedColumns(Activator.CreateInstance(col.MemberType), value, type));
+                col.SetObjectValue(obj, col.FillReferencedColumns(Activator.CreateInstance(col.MemberType), obj, type));
             }
 
-            return value;
+            return obj;
         }
 
         public static void IncludeReferencedColumns(Type type, object list, string sql, Dictionary<string, object> parameters)

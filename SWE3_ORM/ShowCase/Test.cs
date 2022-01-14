@@ -59,6 +59,7 @@ namespace SWE3_ORM_App.ShowCase
 
             try
             {
+                ORMapper.Create(teacher);
                 //ORMapper.Create(course1);
                 //course1.students.Add(s1);
                 //course1.students.Add(s2);
