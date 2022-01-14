@@ -145,7 +145,7 @@ namespace SWE3_ORM_Framework
             }
             catch (Exception ex)
             {
-                throw new OrmDuplicateException(nameof(Create), "Entry with specified id does already exist in database.", ex);
+                throw new OrmDbException(nameof(Create), "Error occured while accessing database, check inner exception.", ex);
             }
             cmd.Dispose();
 
@@ -196,7 +196,7 @@ namespace SWE3_ORM_Framework
             }
             catch (Exception ex)
             {
-                throw new OrmNotFoundException(nameof(Create), "Entry with specified exception does not exist in database.", ex);
+                throw new OrmDbException(nameof(Create), "Error occured while accessing database, check inner exception.", ex);
             }
             cmd.Dispose();
 
@@ -217,7 +217,14 @@ namespace SWE3_ORM_Framework
             param.Value = table.PrimaryKey.GetObjectValue(obj);
             cmd.Parameters.Add(param);
 
-            cmd.ExecuteNonQuery();
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw new OrmDbException(nameof(Create), "Error occured while accessing database, check inner exception.", ex);
+            }
             cmd.Dispose();
 
             cache.RemoveObject(obj);

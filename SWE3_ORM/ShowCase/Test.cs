@@ -20,7 +20,7 @@ namespace SWE3_ORM_App.ShowCase
             teacher.HDate = new DateTime(2020, 5, 4);
             teacher.Salary = 50000;
             teacher.Gender = Gender.Male;
-            teacher.Classes = new System.Collections.Generic.List<Class>() { new Class(), new Class() };
+            teacher.Classes = new List<Class>() { new Class(), new Class() };
 
             var c = new Class();
             c.Id = "c.1";

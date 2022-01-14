@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace SWE3_ORM_Framework.Exceptions
 {
-    public class OrmDuplicateException : OrmExceptionBase
+    public class OrmDbException : OrmExceptionBase
     {
-        public OrmDuplicateException(string method, string message, Exception innerException) : base(method, message, innerException) 
+        public OrmDbException(string method, string message, Exception innerException) : base(method, message, innerException) 
         { 
         }
     }
