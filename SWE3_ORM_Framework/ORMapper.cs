@@ -197,6 +197,10 @@ namespace SWE3_ORM_Framework
             cache.CacheObject(obj);
         }
 
+        /// <summary>
+        /// Updates exisiting object in the database and overwrites existing values with the new values.
+        /// </summary>
+        /// <param name="obj">Object with new values that will replace the object with the same primary key.</param>
         public static void Update(object obj)
         {
             if (!cache.CacheChanged(obj))
@@ -248,6 +252,10 @@ namespace SWE3_ORM_Framework
             cache.CacheObject(obj);
         }
 
+        /// <summary>
+        /// Removes object from the database.
+        /// </summary>
+        /// <param name="obj">Object that will be removed from the database by primary key.</param>
         public static void Remove(object obj)
         {
             Table table = GetTable(obj);
@@ -273,6 +281,12 @@ namespace SWE3_ORM_Framework
             cache.RemoveObject(obj);
         }
 
+        /// <summary>
+        /// Creates and returns a MetaModel Table object for a given type.
+        /// Type will either be the parameter itself or taken from the given object.
+        /// </summary>
+        /// <param name="obj">Object or type that the Table will be created with.</param>
+        /// <returns>The Table that has been created using the parameter.</returns>
         public static Table GetTable(object obj)
         {
             if (obj is Type)
@@ -280,6 +294,12 @@ namespace SWE3_ORM_Framework
             return new Table(obj.GetType());
         }
 
+        /// <summary>
+        /// Creates a complete object from its type by using the reader values.
+        /// </summary>
+        /// <param name="type">The type the created object will be an instance of.</param>
+        /// <param name="reader">Contains the values for each property read by the Datareader in dictionary format.</param>
+        /// <returns>The object with the properties from the reader.</returns>
         public static object CreateObject(Type type, Dictionary<string,object> reader)
         {
             if(reader.ContainsKey("discriminator"))
@@ -325,6 +345,13 @@ namespace SWE3_ORM_Framework
             return obj;
         }
 
+        /// <summary>
+        /// Reads the data of foreign key from database and includes the data into the selected object.
+        /// </summary>
+        /// <param name="type">The type of the foreign key that the referenced data will be of.</param>
+        /// <param name="list">The list of objects that the foreign key references.</param>
+        /// <param name="sql">The sql that is used to select all references for the type of the foreign key.</param>
+        /// <param name="parameters">The parameters that will be added to the sql.</param>
         public static void IncludeReferencedColumns(Type type, object list, string sql, Dictionary<string, object> parameters)
         {
             IDbCommand cmd = Connection.CreateCommand();
@@ -357,6 +384,11 @@ namespace SWE3_ORM_Framework
             cmd.Dispose();
         }
 
+        /// <summary>
+        /// Sets the references for each reference column of an object after it is created or changed.
+        /// </summary>
+        /// <param name="table">The Table object that defines the affiliation of the properties.</param>
+        /// <param name="obj">The object which referenced properties will be set.</param>
         private static void SetReferences(Table table, object obj)
         {
             foreach(var col in table.ReferencedCols)
@@ -365,6 +397,12 @@ namespace SWE3_ORM_Framework
             }
         }
 
+        /// <summary>
+        /// Clears the target table of all entries with set primary key that might conflict with the new data.
+        /// </summary>
+        /// <param name="targetTable">The table which will be affected by the changes.</param>
+        /// <param name="colName">The column of the primary key.</param>
+        /// <param name="pk">The value of the primary key.</param>
         public static void PrepTargetTable(string targetTable, string colName, object pk)
         {
             string pName = ":pk";
@@ -380,6 +418,15 @@ namespace SWE3_ORM_Framework
             cmd.Dispose();
         }
 
+        /// <summary>
+        /// Inserts data into a middle table while persisting MtoN relationships.
+        /// </summary>
+        /// <param name="obj">The object containing the values.</param>
+        /// <param name="targetTable">The middle table that the data will be inserted into.</param>
+        /// <param name="colName">The column of the primary key of the object that will be set in the middle table.</param>
+        /// <param name="pk">The value of the primary key.</param>
+        /// <param name="targetColName">The column of the primary key of the related object that will be set in the middle table.</param>
+        /// <param name="refTable">The table object of the related object.</param>
         public static void InsertIntoMiddleTable(object obj, string targetTable, string colName, object pk, string targetColName, Table refTable)
         {
             string pName = ":pk";

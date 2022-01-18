@@ -7,22 +7,53 @@ using System.Reflection;
 
 namespace SWE3_ORM_Framework.MetaModel
 {
+    /// <summary>
+    /// The MetaData for a table that depends on the class.
+    /// </summary>
     public class Table
     {
+        /// <summary>
+        /// The type of the class that the Table depends on.
+        /// </summary>
         public Type Member { get; private set; }
 
+        /// <summary>
+        /// The name of the table. 
+        /// Can be defined by setting a TableAttribute. Default name is the class name.
+        /// </summary>
         public string Name { get; private set; }
 
+        /// <summary>
+        /// List of all columns that represent the properties of the class.
+        /// </summary>
         public Column[] Columns { get; private set; }
 
+        /// <summary>
+        /// List of all columns that are directly part of the table and persisted in the database.
+        /// </summary>
         public Column[] TableCols { get; private set; }
 
+        /// <summary>
+        /// List of all columns that are not part of and persisted in the table.
+        /// Referenced columns are for object that reference this table and will be selected from the corresponding tables.
+        /// </summary>
         public Column[] ReferencedCols { get; private set; }
 
+        /// <summary>
+        /// The primary key column of this table.
+        /// </summary>
         public Column PrimaryKey { get; private set; }
 
+        /// <summary>
+        /// The discriminator of this table that is used to differenciate between classes in the database in the single table structure.
+        /// If the discriminator is enabled it will be defined by the class name. 
+        /// </summary>
         public string Discriminator { get; private set; } = null;
 
+        /// <summary>
+        /// The constructor of the table builds the object by using the characteristics of the class properties.
+        /// </summary>
+        /// <param name="t">The type of the class that the table will be created for.</param>
         public Table(Type t)
         {
             var tableAttribute = (TableAttribute)t.GetCustomAttribute(typeof(TableAttribute));
