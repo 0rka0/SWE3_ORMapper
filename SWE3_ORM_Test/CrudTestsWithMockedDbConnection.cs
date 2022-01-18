@@ -63,7 +63,7 @@ namespace SWE3_ORM_Test
         {
             var expectedId = "t.0";
             rdMock.Object.searchId = expectedId;
-            var rObj = (Teacher)ORMapper.Get(expectedId, typeof(Teacher));
+            var rObj = (Teacher)ORMapper.GetByPK(expectedId, typeof(Teacher));
 
             Assert.IsNotNull(rObj);
             Assert.AreEqual(expectedId, rObj.Id);
@@ -79,7 +79,7 @@ namespace SWE3_ORM_Test
         {
             var expectedId = "t.2";
             rdMock.Object.searchId = expectedId;
-            var rObj = (Teacher)ORMapper.Get(expectedId, typeof(Teacher));
+            var rObj = (Teacher)ORMapper.GetByPK(expectedId, typeof(Teacher));
 
             Assert.IsNull(rObj);
         }

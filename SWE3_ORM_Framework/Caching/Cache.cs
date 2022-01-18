@@ -40,6 +40,12 @@ namespace SWE3_ORM_Framework.Caching
             hashes.Remove(GetPK(obj));
         }
 
+        public virtual void ClearCache()
+        {
+            cache.Clear();
+            hashes.Clear();
+        }
+
         public virtual bool CacheChanged(object obj)
         {
             if (hashes.ContainsKey(GetPK(obj)))
@@ -50,6 +56,11 @@ namespace SWE3_ORM_Framework.Caching
             return true;
         }
 
+        /// <summary>
+        /// Help method to get the primary key of an object by using ORMapper functionality.
+        /// </summary>
+        /// <param name="obj">Object that holds the values.</param>
+        /// <returns>The primary key value of the object.</returns>
         protected object GetPK(object obj)
         {
             return ORMapper.GetTable(obj).PrimaryKey.GetObjectValue(obj);
@@ -77,6 +88,12 @@ namespace SWE3_ORM_Framework.Caching
             tmpCache.Clear();
         }
 
+        /// <summary>
+        /// Computes a hash by encoding an object with all its property values.
+        /// One different property value will lead to a different hash.
+        /// </summary>
+        /// <param name="obj">Object to compute the hash for.</param>
+        /// <returns>The string that contains the hash.</returns>
         private string GenerateHash(object obj)
         {
             string values = "";

@@ -1,0 +1,490 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SWE3_ORM_Framework</name>
+    </assembly>
+    <members>
+        <member name="T:SWE3_ORM_Framework.Attributes.ColumnAttribute">
+            <summary>
+            The column attribute is used to map properties onto database columns.
+            </summary>
+        </member>
+        <member name="F:SWE3_ORM_Framework.Attributes.ColumnAttribute.Name">
+            <summary>
+            The name of the column.
+            Default name will be the name of the property.
+            </summary>
+        </member>
+        <member name="F:SWE3_ORM_Framework.Attributes.ColumnAttribute.Type">
+            <summary>
+            The type of the column.
+            Default type will be the type of the property.
+            </summary>
+        </member>
+        <member name="F:SWE3_ORM_Framework.Attributes.ColumnAttribute.Nullable">
+            <summary>
+            Defines if a column is nullable in the database.
+            Default will be false.
+            </summary>
+        </member>
+        <member name="T:SWE3_ORM_Framework.Attributes.ForeignKey">
+            <summary>
+            Extends the column attribute and marks a property as a foreign key in the database.
+            </summary>
+        </member>
+        <member name="F:SWE3_ORM_Framework.Attributes.ForeignKey.TargetTable">
+            <summary>
+            Defines the middle table when dealing with MtoN relationships.
+            </summary>
+        </member>
+        <member name="F:SWE3_ORM_Framework.Attributes.ForeignKey.TargetColumn">
+            <summary>
+            Defines the column for the references of the related objects.
+            </summary>
+        </member>
+        <member name="T:SWE3_ORM_Framework.Attributes.Ignore">
+            <summary>
+            The ignore attribute is used to exclude certain objects from database mapping. 
+            </summary>
+        </member>
+        <member name="T:SWE3_ORM_Framework.Attributes.PrimaryKey">
+            <summary>
+            Extends the column attribute and marks a property as a primary key in the database. 
+            </summary>
+        </member>
+        <member name="T:SWE3_ORM_Framework.Attributes.TableAttribute">
+            <summary>
+            The table attribute is used to map classes onto database tables.
+            </summary>
+        </member>
+        <member name="F:SWE3_ORM_Framework.Attributes.TableAttribute.Name">
+            <summary>
+            The name of the table.
+            Default name will be the name of the class.
+            </summary>
+        </member>
+        <member name="F:SWE3_ORM_Framework.Attributes.TableAttribute.Discriminator">
+            <summary>
+            Used to enable a discriminator that will be added to the table if it is true.
+            Necessary for Inheritance. Base and derived classes will be saved in a single table.
+            Discriminators are used to differenciate between different classes that are saved in the same database table.
+            </summary>
+        </member>
+        <member name="M:SWE3_ORM_Framework.Caching.Cache.GetPK(System.Object)">
+            <summary>
+            Help method to get the primary key of an object by using ORMapper functionality.
+            </summary>
+            <param name="obj">Object that holds the values.</param>
+            <returns>The primary key value of the object.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.Caching.Cache.GenerateHash(System.Object)">
+            <summary>
+            Computes a hash by encoding an object with all its property values.
+            One different property value will lead to a different hash.
+            </summary>
+            <param name="obj">Object to compute the hash for.</param>
+            <returns>The string that contains the hash.</returns>
+        </member>
+        <member name="T:SWE3_ORM_Framework.Caching.ICache">
+            <summary>
+            Cache that temporarily persists objects during runtime.
+            </summary>
+        </member>
+        <member name="M:SWE3_ORM_Framework.Caching.ICache.GetObject(System.Object)">
+            <summary>
+            Gets an object from the cache by using the primary key as an identifier.
+            </summary>
+            <param name="pk">The primary key used to identify the object.</param>
+            <returns>The object if one was found, otherwise null.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.Caching.ICache.CacheObject(System.Object)">
+            <summary>
+            Puts an object into the normal and the hashes cache to persist during runtime.
+            </summary>
+            <param name="obj">Object to be persisted.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.Caching.ICache.RemoveObject(System.Object)">
+            <summary>
+            Removes object from the normal and the hashes cache if it is no longer needed.
+            </summary>
+            <param name="obj">The object to be removed.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.Caching.ICache.ClearCache">
+            <summary>
+            Removes all objects from the normal and the hashes cache.
+            </summary>
+        </member>
+        <member name="M:SWE3_ORM_Framework.Caching.ICache.ContainsKey(System.Object)">
+            <summary>
+            Checks if the specified primary key is found in the cache.
+            </summary>
+            <param name="pk">Primary key to be searched.</param>
+            <returns>True if the cache contains the primary key, otherwise false.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.Caching.ICache.CacheChanged(System.Object)">
+            <summary>
+            Checks if the object has changed since it was put into the cache by comparing the hash of the object to the one in the hashes cache. 
+            </summary>
+            <param name="obj">The object to be checked.</param>
+            <returns>True if any value of the object has changed, otherwise false.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.Caching.ICache.SearchTmp(System.Object)">
+            <summary>
+            Searches the temporary cache for a specific object by using the primary key as an identifier.
+            The temporary cache only contains the data for a specific time period when it is needed. 
+            </summary>
+            <param name="obj">The primary key used to identify the object.</param>
+            <returns>The object if one was found, otherwise null.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.Caching.ICache.AddTmp(System.Object)">
+            <summary>
+            Puts an object into the temporary cache to persist data for a specific time period when it is needed.
+            </summary>
+            <param name="obj">Object to be temporarily persisted.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.Caching.ICache.ClearTmp">
+            <summary>
+            Used to completely clear the temporary cache if it is no longer needed.
+            </summary>
+        </member>
+        <member name="T:SWE3_ORM_Framework.Exceptions.OrmDbException">
+            <summary>
+            Exception that signals an error with the database. Check inner exception for further details.
+            </summary>
+        </member>
+        <member name="T:SWE3_ORM_Framework.Exceptions.OrmExceptionBase">
+            <summary>
+            Base exception for the OR Mapper.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.Exceptions.OrmExceptionBase.Method">
+            <summary>
+            Method the exception was thrown in.
+            </summary>
+        </member>
+        <member name="T:SWE3_ORM_Framework.MetaModel.Column">
+            <summary>
+            The MetaData for a column that depends on a property of a class.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.Table">
+            <summary>
+            The table of the class the column is a property of.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.Member">
+            <summary>
+            Information of the property.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.MemberType">
+            <summary>
+            Type of the property.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.Name">
+            <summary>
+            Name of the property.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.Type">
+            <summary>
+            Type defined by the column attribute which will be used in the database.
+            Default type will be the type of the property if nothing else has been defined.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.IsPK">
+            <summary>
+            Defines if the property is the primary key of the table.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.IsFK">
+            <summary>
+            Defines if the property is a foreign key that references or is referenced by another table.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.TargetTable">
+            <summary>
+            Defines the target table that will be used as a middle table for MtoN relationships.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.TargetColumn">
+            <summary>
+            The column of the primary key of the related object that will be set in the middle table.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.Nullable">
+            <summary>
+            Defines if the property will be nullable in the database.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.IsReferencedCol">
+            <summary>
+            Defines if the column is direct part of the table or a referenced column that is part of another table.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Column.IsMtoN">
+            <summary>
+            Defines if the column is a part of a MtoN relationship.
+            </summary>
+        </member>
+        <member name="M:SWE3_ORM_Framework.MetaModel.Column.#ctor(SWE3_ORM_Framework.MetaModel.Table)">
+            <summary>
+            The constructor of the column builds the object and sets the table property.
+            </summary>
+            <param name="table">The table the column is a part of.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.MetaModel.Column.GetObjectValue(System.Object)">
+            <summary>
+            Gets value from an object by getting the value of the property that is allocated to this column.
+            </summary>
+            <param name="obj">The object that contains the values.</param>
+            <returns>The value of this column.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.MetaModel.Column.SetObjectValue(System.Object,System.Object)">
+            <summary>
+            Sets the value of the property of an object, that this column is allocated to.
+            </summary>
+            <param name="obj">The object which values will be changed.</param>
+            <param name="value">The value that is assigned to the specified property.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.MetaModel.Column.ToColumnType(System.Object)">
+            <summary>
+            Changes the code type of an object to the corresponding database type if necessary.
+            Type will be changed if change is necessary or if a different type was specified by using the column attribute.
+            </summary>
+            <param name="obj">The object that will be checked for adjustment.</param>
+            <returns>Object with new type that fits the database.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.MetaModel.Column.ToCodeType(System.Object)">
+            <summary>
+            Changes the database type of an object to the corresponding code type if necessary.
+            If the column is a foreign key, it will be changed to the referenced object.
+            </summary>
+            <param name="obj">The object that will be checked for adjustment.</param>
+            <returns>Object with new type that fits the code.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.MetaModel.Column.FillReferencedColumn(System.Object,System.Object,System.Type)">
+            <summary>
+            Fills the data that was included from the referenced table.
+            </summary>
+            <param name="list">The list that will be filled with the read data.</param>
+            <param name="obj">The object itself which primary key will be used to get referenced data from another table.</param>
+            <param name="type">The type of the object given.</param>
+            <returns>The list with included data from a referenced table.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.MetaModel.Column.GetReferenceSql">
+            <summary>
+            Creates the sql that is used to select all references for the column type that fit the foreign key.
+            </summary>
+            <returns>The sql string to select the references.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.MetaModel.Column.SetReferences(System.Object)">
+            <summary>
+            Sets the references at the middle table in MtoN relationships.
+            </summary>
+            <param name="obj">The currect object which references will be set.</param>
+        </member>
+        <member name="T:SWE3_ORM_Framework.MetaModel.Table">
+            <summary>
+            The MetaData for a table that depends on the class.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Table.Member">
+            <summary>
+            The type of the class that the Table depends on.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Table.Name">
+            <summary>
+            The name of the table. 
+            Can be defined by setting a TableAttribute. Default name is the class name.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Table.Columns">
+            <summary>
+            List of all columns that represent the properties of the class.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Table.TableCols">
+            <summary>
+            List of all columns that are directly part of the table and persisted in the database.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Table.ReferencedCols">
+            <summary>
+            List of all columns that are not part of and persisted in the table.
+            Referenced columns are for object that reference this table and will be selected from the corresponding tables.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Table.PrimaryKey">
+            <summary>
+            The primary key column of this table.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.MetaModel.Table.Discriminator">
+            <summary>
+            The discriminator of this table that is used to differenciate between classes in the database in the single table structure.
+            If the discriminator is enabled it will be defined by the class name. 
+            </summary>
+        </member>
+        <member name="M:SWE3_ORM_Framework.MetaModel.Table.#ctor(System.Type)">
+            <summary>
+            The constructor of the table builds the object by using the characteristics of the class properties.
+            </summary>
+            <param name="t">The type of the class that the table will be created for.</param>
+        </member>
+        <member name="T:SWE3_ORM_Framework.ORMapper">
+            <summary>
+            General OR-Mapper class. Functions can be called to perform basic Database interactions such as:
+            Create: Inserts a new object into the database.
+            Update: Updates existing entry in database.
+            Get: Returns a single object from the database.
+            Remove: Removes single entry from the database.
+            </summary>
+        </member>
+        <member name="P:SWE3_ORM_Framework.ORMapper.Connection">
+            <summary>
+            Holds the connection to the database during runtime.
+            </summary>
+        </member>
+        <member name="F:SWE3_ORM_Framework.ORMapper.cache">
+            <summary>
+            Caches objects during runtime to reduce the load on the database and enable the possibility of including references.
+            </summary>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.StartConnection(System.Data.IDbConnection)">
+            <summary>
+            Starts connection to the database with the given parameter.
+            </summary>
+            <param name="connection">Connection created with connection string.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.GetByPK(System.Object,System.Type)">
+            <summary>
+            Gets a single object with a specific type and primary key from the database if one was found during the selecting process.
+            </summary>
+            <param name="primaryKey">Primary key of the object that wants to be selected.</param>
+            <param name="type">Type of the object that wats to be selected. Takes typeof(class).</param>
+            <returns>Returns the selected object. Otherwise retrns null.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.GetByParams``1(System.Collections.Generic.List{System.Tuple{System.String,System.Object}},System.Boolean)">
+            <summary>
+            Selects data from database by using a custom specific parameters, the sql will be auto generated.
+            </summary>
+            <typeparam name="T">The type of the selected objects.</typeparam>
+            <param name="parameters">The parameters to fill the sql query.</param>
+            <param name="sqlOperator">Defines which operator the sql uses. True for AND and False for OR. Default will be AND.</param>
+            <returns>A List consisting of all the objects that were selected.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.GetBySql``1(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Selects data from database by using a custom sql.
+            </summary>
+            <typeparam name="T">The type of the selected objects.</typeparam>
+            <param name="sql">The sql used to select from the database.</param>
+            <param name="parameters">The parameters to fill the sql query.</param>
+            <returns>A List consisting of all the objects that were selected.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.GetSubtypes(System.Type)">
+            <summary>
+            Takes a type and searches its assembly for subtypes that derive from the specified type.
+            </summary>
+            <param name="type">The type that subtypes will be searched for.</param>
+            <returns>Array of the subtypes if any were found.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.GetDiscriminatorSql(System.Type)">
+            <summary>
+            Creates the sql string addition to select objects of a certain type in a single table that consists of multiple types by their discriminator.
+            </summary>
+            <param name="type">The type to determine which table and discriminator will be used.</param>
+            <returns>The string with the corresponding sql.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.TransformReader(System.Data.IDataReader)">
+            <summary>
+            Returns a Dictionary with the values of the Datareader for a single row so the reader can be closed and reused before the read data is processed.
+            Alternative to deal with multiple result sets.
+            </summary>
+            <param name="reader">The Datareader that data was read with.</param>
+            <returns>A dictionary with the read data. The key represents the column name and the value holds an object with the database entry.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.Create(System.Object)">
+            <summary>
+            Inserts an object into the database.
+            </summary>
+            <param name="obj">Object that will be inserted into the database</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.Update(System.Object)">
+            <summary>
+            Updates exisiting object in the database and overwrites existing values with the new values.
+            </summary>
+            <param name="obj">Object with new values that will replace the object with the same primary key.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.Remove(System.Object)">
+            <summary>
+            Removes object from the database.
+            </summary>
+            <param name="obj">Object that will be removed from the database by primary key.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.GetTable(System.Object)">
+            <summary>
+            Creates and returns a MetaModel Table object for a given type.
+            Type will either be the parameter itself or taken from the given object.
+            </summary>
+            <param name="obj">Object or type that the Table will be created with.</param>
+            <returns>The Table that has been created using the parameter.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.CreateObject(System.Type,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Creates a complete object from its type by using the reader values.
+            </summary>
+            <param name="type">The type the created object will be an instance of.</param>
+            <param name="reader">Contains the values for each property read by the Datareader in dictionary format.</param>
+            <returns>The object with the properties from the reader.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.FillList(System.Type,System.Object,System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Reads the data of specified parameters from database and includes the data into a list.
+            </summary>
+            <param name="type">The type of the foreign key that the referenced data will be of.</param>
+            <param name="list">The list of objects that the foreign key references.</param>
+            <param name="sql">The sql that is used to select all references for the type of the foreign key.</param>
+            <param name="parameters">The parameters that will be added to the sql.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.SetReferences(SWE3_ORM_Framework.MetaModel.Table,System.Object)">
+            <summary>
+            Sets the references for each reference column of an object after it is created or changed.
+            </summary>
+            <param name="table">The Table object that defines the affiliation of the properties.</param>
+            <param name="obj">The object which referenced properties will be set.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.PrepTargetTable(System.String,System.String,System.Object)">
+            <summary>
+            Clears the target table of all entries with set primary key that might conflict with the new data.
+            </summary>
+            <param name="targetTable">The table which will be affected by the changes.</param>
+            <param name="colName">The column of the primary key.</param>
+            <param name="pk">The value of the primary key.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.InsertIntoMiddleTable(System.Object,System.String,System.String,System.Object,System.String,SWE3_ORM_Framework.MetaModel.Table)">
+            <summary>
+            Inserts data into a middle table while persisting MtoN relationships.
+            </summary>
+            <param name="obj">The object containing the values.</param>
+            <param name="targetTable">The middle table that the data will be inserted into.</param>
+            <param name="colName">The column of the primary key of the object that will be set in the middle table.</param>
+            <param name="pk">The value of the primary key.</param>
+            <param name="targetColName">The column of the primary key of the related object that will be set in the middle table.</param>
+            <param name="refTable">The table object of the related object.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.ResetDatabase">
+            <summary>
+            Deletes all entries from all tables in the database.
+            </summary>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.ClearCache">
+            <summary>
+            Deletes all entries from the cache.
+            </summary>
+        </member>
+    </members>
+</doc>

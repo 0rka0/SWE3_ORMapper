@@ -129,7 +129,7 @@ namespace SWE3_ORM_Test
         [Test]
         public void ToCodeType_ChangesDbTypeToFitCode_IntChangedToEnum()
         {
-            var actualValue = table.TableCols[5].ToCodeType(0, new Cache());
+            var actualValue = table.TableCols[5].ToCodeType(0);
 
             Assert.IsTrue(actualValue.GetType().IsEnum);
             Assert.AreEqual(teacher.Gender, actualValue);
@@ -142,7 +142,7 @@ namespace SWE3_ORM_Test
         [Test]
         public void GetReferenceSql_CreatesSqlToSelectReferences_ReturnsCorrectSql()
         {
-            var actualValue = table.ReferencedCols[0].GetReferenceSql(typeof(Teacher));
+            var actualValue = table.ReferencedCols[0].GetReferenceSql();
 
             Assert.AreEqual("SELECT * FROM classes WHERE kteacher = :fk", actualValue);
         }

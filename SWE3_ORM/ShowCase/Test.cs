@@ -13,14 +13,14 @@ namespace SWE3_ORM_App.ShowCase
         public static void Run()
         {
             var teacher = new Teacher();
-            teacher.Id = "t.0";
+            teacher.Id = "t.1";
             teacher.Name = "Fritz";
             teacher.FirstName = "Ferdinand";
             teacher.BDate = new DateTime(1990, 8, 26);
             teacher.HDate = new DateTime(2020, 5, 4);
             teacher.Salary = 50000;
             teacher.Gender = Gender.Male;
-            teacher.Classes = new List<Class>() { new Class(), new Class() };
+            teacher.Classes = new List<Class>() { new Class() };
 
             var c = new Class();
             c.Id = "c.1";
@@ -59,7 +59,9 @@ namespace SWE3_ORM_App.ShowCase
 
             try
             {
-                ORMapper.Create(teacher);
+                ORMapper.GetByParams<Teacher>(new List<Tuple<string, object>>() { new Tuple<string, object>("id", "t.0"), new Tuple<string, object>("id", "t.1") }, false);
+                ORMapper.GetBySql<Teacher>("SELECT * FROM persons WHERE id = :v1", new Dictionary<string, object>() { { ":v1", "t.0" } });
+                //ORMapper.Create(teacher);
                 //ORMapper.Create(course1);
                 //course1.students.Add(s1);
                 //course1.students.Add(s2);
@@ -70,8 +72,8 @@ namespace SWE3_ORM_App.ShowCase
                 Console.WriteLine(ex.Message);
             }
 
-            var test = ORMapper.Get("t.0", typeof(Teacher));
-            var test2 = ORMapper.Get("co.0", typeof(Course));
+            var test = ORMapper.GetByPK("t.0", typeof(Teacher));
+            var test2 = ORMapper.GetByPK("co.0", typeof(Course));
             Console.WriteLine(((Teacher)test).Id);
             Console.WriteLine(((Teacher)test).Classes[0].Id);
         }

@@ -44,7 +44,7 @@ namespace SWE3_ORM_Framework
         /// <param name="primaryKey">Primary key of the object that wants to be selected.</param>
         /// <param name="type">Type of the object that wats to be selected. Takes typeof(class).</param>
         /// <returns>Returns the selected object. Otherwise retrns null.</returns>
-        public static object Get(object primaryKey, Type type)
+        public static object GetByPK(object primaryKey, Type type)
         {
             if(cache.ContainsKey(primaryKey))
             {
@@ -68,8 +68,6 @@ namespace SWE3_ORM_Framework
             pkParam.Value = primaryKey;
             cmd.Parameters.Add(pkParam);
 
-            Console.WriteLine(cmd.CommandText);
-
             IDataReader reader = cmd.ExecuteReader();
             if (reader.Read())
             {
@@ -85,6 +83,71 @@ namespace SWE3_ORM_Framework
             cache.ClearTmp();
 
             return value;
+        }
+
+        /// <summary>
+        /// Selects data from database by using a custom specific parameters, the sql will be auto generated.
+        /// </summary>
+        /// <typeparam name="T">The type of the selected objects.</typeparam>
+        /// <param name="parameters">The parameters to fill the sql query.</param>
+        /// <param name="sqlOperator">Defines which operator the sql uses. True for AND and False for OR. Default will be AND.</param>
+        /// <returns>A List consisting of all the objects that were selected.</returns>
+        public static List<T> GetByParams<T>(List<Tuple<string, object>> parameters, bool sqlOperator = true)
+        {
+            if (parameters == null || parameters.Count == 0)
+                return null;
+
+            string disc;
+            if (sqlOperator)
+                disc = " AND ";
+            else
+                disc = " OR ";
+
+            Type type = typeof(T);
+            Table table = GetTable(typeof(T));
+            Dictionary<string, object> sqlParams = new Dictionary<string, object>();
+            List<T> res = new List<T>();
+
+            var sql = $"SELECT * FROM {table.Name} WHERE ";
+
+            if (table.Discriminator != null)
+            {
+                sql += GetDiscriminatorSql(type);
+            }
+
+            sql += "(";
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                if (i > 0)
+                    sql += disc;
+
+                var pName = ":v" + i;
+                sql += $"{parameters[i].Item1} = {pName}";
+
+                sqlParams.Add(pName, parameters[i].Item2);  
+            }
+            sql += ")";
+
+            FillList(type, res, sql, sqlParams);
+
+            return res;
+        }
+
+        /// <summary>
+        /// Selects data from database by using a custom sql.
+        /// </summary>
+        /// <typeparam name="T">The type of the selected objects.</typeparam>
+        /// <param name="sql">The sql used to select from the database.</param>
+        /// <param name="parameters">The parameters to fill the sql query.</param>
+        /// <returns>A List consisting of all the objects that were selected.</returns>
+        public static List<T> GetBySql<T>(string sql, Dictionary<string, object> parameters)
+        {
+            Type type = typeof(T);
+            List<T> res = new List<T>();
+
+            FillList(type, res, sql, parameters);
+
+            return res;
         }
 
         /// <summary>
@@ -311,7 +374,7 @@ namespace SWE3_ORM_Framework
 
             var table = GetTable(type);
 
-            var pk = table.PrimaryKey.ToCodeType(reader[table.PrimaryKey.Name.ToLower()], cache);
+            var pk = table.PrimaryKey.ToCodeType(reader[table.PrimaryKey.Name.ToLower()]);
 
             object obj = null;
             
@@ -334,25 +397,25 @@ namespace SWE3_ORM_Framework
 
             foreach (var col in table.TableCols)
             {
-                col.SetObjectValue(obj, col.ToCodeType(reader[col.Name.ToLower()], cache));
+                col.SetObjectValue(obj, col.ToCodeType(reader[col.Name.ToLower()]));
             }
 
             foreach (var col in table.ReferencedCols)
             {
-                col.SetObjectValue(obj, col.FillReferencedColumns(Activator.CreateInstance(col.MemberType), obj, type));
+                col.SetObjectValue(obj, col.FillReferencedColumn(Activator.CreateInstance(col.MemberType), obj, type));
             }
 
             return obj;
         }
 
         /// <summary>
-        /// Reads the data of foreign key from database and includes the data into the selected object.
+        /// Reads the data of specified parameters from database and includes the data into a list.
         /// </summary>
         /// <param name="type">The type of the foreign key that the referenced data will be of.</param>
         /// <param name="list">The list of objects that the foreign key references.</param>
         /// <param name="sql">The sql that is used to select all references for the type of the foreign key.</param>
         /// <param name="parameters">The parameters that will be added to the sql.</param>
-        public static void IncludeReferencedColumns(Type type, object list, string sql, Dictionary<string, object> parameters)
+        public static void FillList(Type type, object list, string sql, Dictionary<string, object> parameters)
         {
             IDbCommand cmd = Connection.CreateCommand();
             cmd.CommandText = sql;
@@ -446,6 +509,24 @@ namespace SWE3_ORM_Framework
 
             cmd.ExecuteNonQuery();
             cmd.Dispose();
+        }
+
+        /// <summary>
+        /// Deletes all entries from all tables in the database.
+        /// </summary>
+        public static void ResetDatabase()
+        {
+            IDbCommand cmd = Connection.CreateCommand();
+            cmd.CommandText = "TRUNCATE persons, classes, courses, student_courses CASCADE";
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Deletes all entries from the cache.
+        /// </summary>
+        public static void ClearCache()
+        {
+            cache.ClearCache();
         }
     }
 }

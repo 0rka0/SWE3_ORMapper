@@ -1,7 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>D:\FH_WS21\SWE3\SWE3_ORMapper\SWE3_ORM_Framework\SWE3_ORM_Framework.xml</DocumentationFile>
   </PropertyGroup>
 
 </Project>

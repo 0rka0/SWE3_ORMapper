@@ -5,6 +5,7 @@ using SWE3_ORM_Framework;
 using Npgsql;
 using SWE3_ORM_App.ModelClasses;
 using SWE3_ORM_App.ShowCase;
+using SWE3_ORM_App;
 
 namespace SWE3_ORM
 {
@@ -12,10 +13,13 @@ namespace SWE3_ORM
     {
         static void Main(string[] args)
         {
-            string connectionString = ConfigurationManager.AppSettings["connectionString"];
-            ORMapper.StartConnection(new NpgsqlConnection(connectionString));
-
-            Test.Run();
+            Showcase.Setup();
+            Showcase.CreateTeacher();
+            Showcase.CreateClasses();
+            Showcase.CreateStudents();
+            Showcase.CreateCourses();
+            Showcase.AddStudentsToCourses();
+            Showcase.SelectTeacherWithClasses();
         }
     }
 }
