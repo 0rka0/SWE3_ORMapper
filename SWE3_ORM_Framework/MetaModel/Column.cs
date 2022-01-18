@@ -2,11 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SWE3_ORM_Framework.MetaModel
 {
@@ -148,7 +144,7 @@ namespace SWE3_ORM_Framework.MetaModel
             return list;
         }
 
-        string GetReferenceSql(Type type)
+        public string GetReferenceSql(Type type)
         {
             Table table = ORMapper.GetTable(MemberType.GenericTypeArguments[0]);
             string sql = $"SELECT * FROM {table.Name} WHERE ";

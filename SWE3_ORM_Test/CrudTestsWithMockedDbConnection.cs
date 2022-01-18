@@ -85,6 +85,21 @@ namespace SWE3_ORM_Test
         }
 
         /// <summary>
+        /// Transforms DataReader Values To Dictionary by using the keys and values of the reader.
+        /// Test result will be positive if the Dictionary data represents the data of the reader.
+        /// </summary>
+        [Test]
+        public void TransformReader()
+        {
+            var expectedId = "t.0";
+            rdMock.Object.searchId = expectedId;
+            rdMock.Object.Read();
+            var actualValue = ORMapper.TransformReader(rdMock.Object);
+
+            Assert.AreEqual(expectedId, actualValue["id"]);
+        }
+
+        /// <summary>
         /// Inserts object into the database. Database operation ExecuteNonQuery is mocked so it will get skipped during execution.
         /// Test if everything else is handled correspondingly and does not lead to any errors.
         /// Test result will be positive if the Create method does run without exception.

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using SWE3_ORM_Framework;
 
 namespace SWE3_ORM_Framework.Caching
 {
@@ -48,7 +44,7 @@ namespace SWE3_ORM_Framework.Caching
         {
             if (hashes.ContainsKey(GetPK(obj)))
             {
-                return hashes[GetPK(obj)] == GenerateHash(obj);
+                return hashes[GetPK(obj)] != GenerateHash(obj);
             }
 
             return true;

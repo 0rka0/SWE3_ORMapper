@@ -135,7 +135,7 @@ namespace SWE3_ORM_Framework
         }
 
         /// <summary>
-        /// Creates and inserts an object 
+        /// Inserts an object into the database.
         /// </summary>
         /// <param name="obj">Object that will be inserted into the database</param>
         public static void Create(object obj)
