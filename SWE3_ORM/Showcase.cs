@@ -27,7 +27,19 @@ namespace SWE3_ORM_App
         {
             string connectionString = ConfigurationManager.AppSettings["connectionString"];
             ORMapper.StartConnection(new NpgsqlConnection(connectionString));
+        }
 
+        public static void CreateTables()
+        {
+            ORMapper.CreateTable(typeof(Person));
+            ORMapper.CreateTable(typeof(Class));
+            ORMapper.CreateTable(typeof(Course));
+
+            ORMapper.AddRelationshipConstraints(new Type[] { typeof(Person), typeof(Class), typeof(Course) });
+        }
+
+        public static void Reset()
+        {
             ORMapper.ResetDatabase();
         }
 

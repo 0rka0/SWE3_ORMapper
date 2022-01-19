@@ -1,4 +1,5 @@
-﻿using SWE3_ORM_Framework.Caching;
+﻿using SWE3_ORM_Framework.Attributes;
+using SWE3_ORM_Framework.Caching;
 using SWE3_ORM_Framework.Exceptions;
 using SWE3_ORM_Framework.MetaModel;
 using System;
@@ -527,6 +528,181 @@ namespace SWE3_ORM_Framework
         public static void ClearCache()
         {
             cache.ClearCache();
+        }
+
+        /// <summary>
+        /// Creates a table for the specified class in the database. 
+        /// Does not create classes for foreign keys, they have to be created individually and relationships have to be set manually after creating the tables.
+        /// </summary>
+        /// <param name="type">The type of class to create a table for.</param>
+        public static void CreateTable(Type type)
+        {
+            if ((TableAttribute)type.BaseType.GetCustomAttribute(typeof(TableAttribute)) != null)
+            {
+                CreateTable(type.BaseType);
+                return;
+            }
+
+            Table table = GetTable(type);
+
+            IDbCommand cmd = Connection.CreateCommand();
+            cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {table.Name}";
+
+            var colList = table.TableCols.ToList();
+            var subTypes = GetSubtypes(type);
+            foreach (var t in subTypes)
+            {
+                colList.AddRange(GetTable(t).TableCols.Where(x => !colList.Any(y => y.Name == x.Name)));
+            }
+
+            string setup = string.Empty;
+            for (int i = 0; i < colList.Count; i++)
+            {
+                if (i > 0)
+                    setup += ",\n";
+
+                setup += $"{colList[i].Name} {ConvertType(colList[i].Type)}";
+
+                if (colList[i].IsPK)
+                    setup += " PRIMARY KEY";
+                if (!colList[i].Nullable)
+                    setup += " NOT NULL";
+            }
+
+            if (!String.IsNullOrWhiteSpace(table.Discriminator))
+            {
+                setup += $", {nameof(table.Discriminator).ToLower()} {ConvertType(typeof(string))} NOT NULL";
+            }
+
+            cmd.CommandText += $" ({setup});";
+
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw new OrmDbException(nameof(Create), "Error occured while accessing database, check inner exception.", ex);
+            }
+            cmd.Dispose();
+        }
+
+        /// <summary>
+        /// Converts the type so that it can be used to create a table in the database.
+        /// </summary>
+        /// <param name="type">Type type to be converted.</param>
+        /// <returns>A string that contains the database type.</returns>
+        public static string ConvertType(Type type)
+        {
+            if (Equals(type, typeof(string)))
+            {
+                return "varchar(64)";
+            }
+            if (Equals(type, typeof(int)))
+            {
+                return "integer";
+            }
+            if (Equals(type, typeof(short)))
+            {
+                return "smallint";
+            }
+            if (Equals(type, typeof(long)))
+            {
+                return "bigint";
+            }
+            if (Equals(type, typeof(float)))
+            {
+                return "real";
+            }
+            if (Equals(type, typeof(double)))
+            {
+                return "double precision";
+            }
+            if (Equals(type, typeof(DateTime)))
+            {
+                return "timestamp";
+            }
+            if (type.IsEnum)
+            {
+                return "integer";
+            }
+            if ((TableAttribute)type.GetCustomAttribute(typeof(TableAttribute)) != null)
+            {
+                return "varchar(64)";
+            }
+
+            return "";
+        }
+
+        /// <summary>
+        /// Adds foreign key constraints to columns that are marked with the corresponding attribute to the specified tables.
+        /// Also adds middle tables for MtoN relationships.
+        /// </summary>
+        /// <param name="typeArr">Array of types to which contraints shall be added.</param>
+        public static void AddRelationshipConstraints(Type[] typeArr)
+        {
+            Type type;
+            foreach (var typeParam in typeArr)
+            {
+                type = typeParam;
+                while ((TableAttribute)type.BaseType.GetCustomAttribute(typeof(TableAttribute)) != null)
+                {
+                    type = type.BaseType;
+                }
+
+                Table table = GetTable(type);
+
+                var tableColList = table.TableCols.ToList();
+                var refColList = table.ReferencedCols.ToList();
+                var subTypes = GetSubtypes(type);
+                foreach(var t in subTypes)
+                {
+                    tableColList.AddRange(GetTable(t).TableCols.Where(x => !tableColList.Any(y => y.Name == x.Name)));
+                    refColList.AddRange(GetTable(t).ReferencedCols.Where(x => !refColList.Any(y => y.Name == x.Name)));
+                }
+
+                foreach (var c in tableColList.Where(x => x.IsFK))
+                {
+                    var t = GetTable(c.Type);
+                    IDbCommand cmd = Connection.CreateCommand();
+                    cmd.CommandText = $"ALTER TABLE {table.Name} DROP CONSTRAINT IF EXISTS fk_{c.Type.Name.ToLower()};\n";
+                    cmd.CommandText += $"ALTER TABLE {table.Name} ADD CONSTRAINT fk_{c.Type.Name.ToLower()} FOREIGN KEY({c.Name.ToLower()}) REFERENCES {t.Name}({t.PrimaryKey.Name.ToLower()}) ON DELETE SET NULL;";
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new OrmDbException(nameof(Create), "Error occured while accessing database, check inner exception.", ex);
+                    }
+                    cmd.Dispose();
+                }
+
+                foreach (var r in refColList.Where(x => x.IsMtoN))
+                {
+                    string setup = string.Empty;
+                    IDbCommand cmd = Connection.CreateCommand();
+                    cmd.CommandText = $"CREATE TABLE IF NOT EXISTS {r.TargetTable}";
+
+                    var targetColTable = GetTable(r.Type.GetGenericArguments().Single());
+
+                    setup += $"{r.Name.ToLower()} {ConvertType(typeof(string))},\n";
+                    setup += $"{r.TargetColumn.ToLower()} {ConvertType(typeof(string))},\n";
+                    setup += $"CONSTRAINT fk_{r.Name.ToLower()} FOREIGN KEY ({r.Name.ToLower()}) REFERENCES {table.Name}({table.PrimaryKey.Name.ToLower()}) ON DELETE SET NULL,\n";
+                    setup += $"CONSTRAINT fk_{r.TargetColumn.ToLower()} FOREIGN KEY ({r.TargetColumn.ToLower()}) REFERENCES {targetColTable.Name.ToLower()}({targetColTable.PrimaryKey.Name.ToLower()}) ON DELETE SET NULL\n";
+                    cmd.CommandText += $" ({setup});";
+
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new OrmDbException(nameof(Create), "Error occured while accessing database, check inner exception.", ex);
+                    }
+                    cmd.Dispose();
+                }
+            }
         }
     }
 }

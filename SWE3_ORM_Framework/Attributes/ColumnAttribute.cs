@@ -21,8 +21,8 @@ namespace SWE3_ORM_Framework.Attributes
 
         /// <summary>
         /// Defines if a column is nullable in the database.
-        /// Default will be false.
+        /// Default will be true.
         /// </summary>
-        public bool Nullable = false;
+        public bool Nullable = true;
     }
 }

@@ -101,6 +101,7 @@ namespace SWE3_ORM_Framework.MetaModel
                 {
                     PrimaryKey = col;
                     col.IsPK = true;
+                    col.Nullable = false;
                 }
 
                 if(colAttribute is ForeignKey)

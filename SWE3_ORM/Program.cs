@@ -1,11 +1,4 @@
-﻿using System;
-using System.Configuration;
-using System.Collections.Specialized;
-using SWE3_ORM_Framework;
-using Npgsql;
-using SWE3_ORM_App.ModelClasses;
-using SWE3_ORM_App.ShowCase;
-using SWE3_ORM_App;
+﻿using SWE3_ORM_App;
 
 namespace SWE3_ORM
 {
@@ -14,6 +7,8 @@ namespace SWE3_ORM
         static void Main(string[] args)
         {
             Showcase.Setup();
+            Showcase.CreateTables();
+            Showcase.Reset();
             Showcase.CreateTeacher();
             Showcase.CreateClasses();
             Showcase.CreateStudents();

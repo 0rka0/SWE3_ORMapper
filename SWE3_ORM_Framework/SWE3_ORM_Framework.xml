@@ -24,7 +24,7 @@
         <member name="F:SWE3_ORM_Framework.Attributes.ColumnAttribute.Nullable">
             <summary>
             Defines if a column is nullable in the database.
-            Default will be false.
+            Default will be true.
             </summary>
         </member>
         <member name="T:SWE3_ORM_Framework.Attributes.ForeignKey">
@@ -485,6 +485,26 @@
             <summary>
             Deletes all entries from the cache.
             </summary>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.CreateTable(System.Type)">
+            <summary>
+            Creates a table for the specified class in the database. 
+            Does not create classes for foreign keys, they have to be created individually and relationships have to be set manually after creating the tables.
+            </summary>
+            <param name="type">The type of class to create a table for.</param>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.ConvertType(System.Type)">
+            <summary>
+            Converts the type so that it can be used to create a table in the database.
+            </summary>
+            <param name="type">Type type to be converted.</param>
+            <returns>A string that contains the database type.</returns>
+        </member>
+        <member name="M:SWE3_ORM_Framework.ORMapper.AddFkConstraints(System.Type[])">
+            <summary>
+            Adds foreign key constraints that are marked with the table attribute to the specified tables.
+            </summary>
+            <param name="typeArr">Array of types to which contraints shall be added.</param>
         </member>
     </members>
 </doc>
