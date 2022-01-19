@@ -500,9 +500,10 @@
             <param name="type">Type type to be converted.</param>
             <returns>A string that contains the database type.</returns>
         </member>
-        <member name="M:SWE3_ORM_Framework.ORMapper.AddFkConstraints(System.Type[])">
+        <member name="M:SWE3_ORM_Framework.ORMapper.AddRelationshipConstraints(System.Type[])">
             <summary>
-            Adds foreign key constraints that are marked with the table attribute to the specified tables.
+            Adds foreign key constraints to columns that are marked with the corresponding attribute to the specified tables.
+            Also adds middle tables for MtoN relationships.
             </summary>
             <param name="typeArr">Array of types to which contraints shall be added.</param>
         </member>

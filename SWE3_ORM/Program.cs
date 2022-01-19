@@ -15,6 +15,11 @@ namespace SWE3_ORM
             Showcase.CreateCourses();
             Showcase.AddStudentsToCourses();
             Showcase.SelectTeacherWithClasses();
+            Showcase.SelectClassWithStudents();
+            Showcase.SelectCoursesAndStudents();
+            Showcase.SelectStudentsByParamters();
+            Showcase.SelectTeacherBySql();
+            Showcase.RemoveCourse();
         }
     }
 }
