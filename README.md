@@ -3,6 +3,8 @@
 Kurztutorial im Falle von Unklarheiten: 
 (Ausführlichere Dokumentation ist im Code bei den einzelnen Methoden zu finden)
 
+Der eigene connection string wird in der App.config als connectionString definiert.
+
 Der ORMapper erstellt die Tabellen mittels der CreateTable() Methode für alle gewünschten Klassen. 
 Vererbung wird in einer einzelnen Tabelle dargestellt und hier ist es unwichtig welche dieser Klassen angegeben wird, der ORMapper erstellt eine Tabelle die alle Klassen fässt.
 Nachdem alle Tabellen erstellt wurden ist es hier notwendig im Anschluss noch die AddRelationshipConstrains() Methode mit allen gewünschten Klassen aufzurufen, sodass foreign key constraints und Zwischentabellen vom Mapper generiert werden.
