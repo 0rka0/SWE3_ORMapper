@@ -1,0 +1,57 @@
+drop table persons;
+
+CREATE TABLE persons (
+id varchar(64) primary key,
+discriminator varchar(64) not null,
+name varchar(64) not null,
+firstname varchar (64) not null, 
+gender integer not null,
+bdate timestamp not null,
+hdate timestamp,
+salary integer,
+kclass varchar(64),
+grade integer
+);
+
+drop table classes;
+
+CREATE TABLE classes (
+id varchar(64) primary key,
+name varchar(64) not null,
+kteacher varchar(64),
+CONSTRAINT fk_teacher
+  FOREIGN KEY(kteacher) 
+  REFERENCES persons(id)
+  ON DELETE SET NULL
+);
+
+ALTER TABLE persons
+ ADD CONSTRAINT fk_class FOREIGN KEY(kclass) REFERENCES classes(id) ON DELETE SET NULL;
+
+drop table courses;
+
+CREATE TABLE courses (
+id varchar(64) primary key,
+hactive integer not null,
+name varchar(64) not null,
+kteacher varchar(64),
+CONSTRAINT fk_teacher
+  FOREIGN KEY(kteacher)
+  REFERENCES persons(id)
+  ON DELETE SET NULL
+);
+
+drop table student_courses;
+
+CREATE TABLE student_courses (
+kstudent varchar(64),
+kcourse varchar(64),
+CONSTRAINT fk_student
+  FOREIGN KEY (kstudent) 
+  REFERENCES persons(id)
+  ON DELETE SET NULL,
+CONSTRAINT fk_course
+  FOREIGN KEY(kcourse)
+  REFERENCES courses(id)
+  ON DELETE SET NULL
+);
